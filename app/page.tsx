@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Banner from "./banner/Banner";
@@ -9,6 +9,8 @@ import "aos/dist/aos.css"; // Import AOS CSS
 import HomeBanner from "./banner/HomeBanner";
 import "./banner/HomeBanner.css";
 import Header from "./banner/Header";
+import ScrollToTop from "react-scroll-to-top";
+import { IoIosArrowDropupCircle } from "react-icons/io";
 
 export default function Home() {
   const [image, setImage] = useState<File | null>(null);
@@ -68,6 +70,9 @@ export default function Home() {
       setResult(text);
       generateKeywords(text);
       await generateRelatedQuestions("image", text);
+      (scrollToResult as any)?.current.scrollIntoView({
+        behavior: "smooth",
+      });
     } catch (error) {
       handleError(error);
     }
@@ -91,6 +96,9 @@ export default function Home() {
       setResult(text);
       generateKeywords(text);
       await generateRelatedQuestions("input", text);
+      (scrollToResult as any)?.current.scrollIntoView({
+        behavior: "smooth",
+      });
     } catch (error) {
       handleError(error);
     }
@@ -208,59 +216,90 @@ export default function Home() {
   };
   console.log("relatedQuestions", relatedQuestions);
 
+  const scrollToHome = useRef<HTMLDivElement>(null);
+  const scrollToExplore = useRef<HTMLDivElement>(null);
+  const scrollToFeatures = useRef<HTMLDivElement>(null);
+  const scrollToResult = useRef<HTMLDivElement>(null);
+
+  const scrollButtonStyle = {
+    borderRadius: "25px",
+    background: "#ffffff",
+    color: "#6456DF",
+    width: "32px",
+    height: "32px",
+  };
   return (
-    <div className="min-h-screen bg-primary">
+    <div className="min-h-screen bg-primary" ref={scrollToHome && scrollToHome}>
       <div className="banner">
         <img src="./res.jpg" alt="Banner" className="banner-image" />
         <div className="overlay"></div>
+        <Header
+          scrollToFeatures={scrollToFeatures}
+          scrollToExplore={scrollToExplore}
+          scrollToHome={scrollToHome}
+        />
         <div className="content">
           <h1 className="text-white font-bold astoria-font text-5xl">
-            <p className="text-2xl md:text-6xl text-secondary font-bold mb-6 astoria-font tracking-wider">
-            Smart Travel, Zero Hassle!
+            <p className="text-2xl md:text-6xl text-white font-bold mb-6 astoria-font tracking-wider">
+              Smart Travel, Zero Hassle
             </p>
-            <p className="text-xl md:text-3xl font-bold mb-4 astoria-font tracking-wider">
-            Your AI travel buddy for stress-free adventures
+            <p className="text-2xl md:text-6xl text-white font-bold mb-8 astoria-font tracking-wider">
+              Guided By Next-Gen <span className="text-secondary">AI</span>
+            </p>
+            <p className="text-xl md:text-2xl font-bold mb-4 astoria-font tracking-wider">
+              Let us guide you to effortless exploration and joy
             </p>
           </h1>
-        </div>
-        <Header />
-      </div>
-      <main className="">
-        <div className="bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800 rounded-lg shadow-xl">
-          <Banner />
-          <div className="p-8">
-            <h2
-              className="text-3xl font-extrabold text-white mb-8 text-center"
-              data-aos="fade-up"
+          <p>
+            <button
+              className="bg-transparent text-white py-2 px-4  font-medium border border-gray-300 transition duration-150 ease-in-out"
+              onClick={() =>
+                (scrollToExplore as any).current.scrollIntoView({
+                  behavior: "smooth",
+                })
+              }
             >
+              Explore Destination
+            </button>
+          </p>
+        </div>
+      </div>
+
+      <div ref={scrollToFeatures && scrollToFeatures}>
+        <Banner />
+      </div>
+      <main className="" ref={scrollToExplore && scrollToExplore}>
+        <div className="bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800 rounded-lg">
+          <div className="p-4 md:p-8 ">
+            <h2 className="text-3xl font-extrabold text-white mb-12 text-center astoria-font">
               Search using Your Image or Enter Name of the place
             </h2>
 
             {/* Option Toggle */}
-            <div className="mb-8 flex justify-center">
+            <div className="mb-6 flex justify-center">
               <button
-                className={`mr-4 py-2 px-4 rounded-lg font-medium ${
+                className={`mr-4 py-2 px-4 rounded-lg font-medium w-44 ${
                   inputType === "image"
-                    ? "border-b-2 border-secondary text-white"
-                    : "bg-gray-200 text-gray-800"
+                    ? "border-b-2 border-secondary bg-gray-800 text-white"
+                    : "bg-gray-800 text-white"
                 }`}
                 onClick={() => handleInputTypeChange("image")}
               >
                 Upload Image
               </button>
               <button
-                className={`py-2 px-4 rounded-lg font-medium ${
+                className={`py-2 px-4 rounded-lg font-medium w-44  ${
                   inputType === "text"
-                    ? "border-b-2 border-secondary text-white"
-                    : "bg-gray-200 text-gray-800"
+                    ? "border-b-2 border-secondary bg-gray-800 text-white"
+                    : "bg-gray-800 text-white"
                 }`}
                 onClick={() => handleInputTypeChange("text")}
               >
                 Enter Place Name
               </button>
             </div>
-            <div className="grid grid-cols-12 gap-4 items-start">
-              <div className="md:col-span-6 col-span-12">
+            <div className="grid grid-cols-12 gap-4 items-center max-w-4xl mx-auto">
+              <div className="md:col-span-5 col-span-12">
                 {/* Image Upload */}
                 {inputType === "image" && (
                   <div className="mb-8">
@@ -275,19 +314,8 @@ export default function Home() {
                       id="image-upload"
                       accept="image/*"
                       onChange={handleImageUpload}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition duration-150 ease-in-out"
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-tertiary hover:file:bg-blue-100 transition duration-150 ease-in-out"
                     />
-                    {image && (
-                      <div className="mt-4 flex justify-center">
-                        <Image
-                          src={URL.createObjectURL(image)}
-                          alt="Uploaded image"
-                          width={200}
-                          height={200}
-                          className="rounded-lg shadow-md"
-                        />
-                      </div>
-                    )}
                   </div>
                 )}
 
@@ -296,7 +324,7 @@ export default function Home() {
                   <div className="mb-8">
                     <label
                       htmlFor="text-input"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-sm font-medium text-gray-300 mb-2"
                     >
                       Enter the name of place
                     </label>
@@ -310,12 +338,12 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="md:col-span-6 col-span-12">
+              <div className="md:col-span-5 col-span-12">
                 {/* Category Dropdown */}
                 <div className="mb-8">
                   <label
                     htmlFor="category"
-                    className="block text-sm font-medium text-white mb-2"
+                    className="block text-sm font-medium text-gray-300 mb-2"
                   >
                     Select a Category
                   </label>
@@ -336,43 +364,47 @@ export default function Home() {
                   </select>
                 </div>
               </div>
+              <div className="col-span-12 md:col-span-2 align-self-end ">
+                <button
+                  onClick={() => identifyImageOrText()}
+                  disabled={
+                    (inputType === "image" && !image) ||
+                    (inputType === "text" && !textInput.trim()) ||
+                    loading
+                  }
+                  className="w-full bg-tertiary text-white py-2.5 px-4 rounded-lg md:rounded-r-full hover:bg-tertiary/80 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
+                >
+                  {loading ? "Searching..." : "Search"}
+                </button>
+              </div>
             </div>
-
-            <button
-              onClick={() => identifyImageOrText()}
-              disabled={
-                (inputType === "image" && !image) ||
-                (inputType === "text" && !textInput.trim()) ||
-                loading
-              }
-              className="w-full bg-tertiary text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
-            >
-              {loading ? "Searching..." : "Search"}
-            </button>
           </div>
 
           {result && (
-            <div className="bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800 p-8">
-              <h3 className="text-2xl font-bold text-secondary mb-4">
-                Your Search Result:
+            <div
+              className="bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800 p-4 md:p-8"
+              ref={scrollToResult}
+            >
+              <h3 className="text-3xl font-semibold text-secondary mb-4 astoria-font">
+                Your Destination Information
               </h3>
-              <div className="prose prose-blue max-w-none">
+              <div className="prose prose-blue max-w-none mb-12">
                 {result.split("\n").map((line, index) => (
-                  <p key={index} className="mb-2 text-gray-300">
+                  <p key={index} className="mb-2 text-gray-300 text-lg">
                     {line}
                   </p>
                 ))}
               </div>
-              <div className="mt-6">
-                <h4 className="text-lg font-semibold mb-2 text-secondary">
-                  Related Keywords:
+              <div className="mb-12">
+                <h4 className="text-3xl font-semibold text-secondary mb-4 astoria-font">
+                  Related Keywords
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {keywords.map((keyword, index) => (
                     <button
                       key={index}
                       onClick={() => regenerateContent(keyword)}
-                      className=" bg-slate-800 text-secondary w-32 text-center px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition duration-150 ease-in-out"
+                      className=" bg-slate-800 text-secondary w-32 text-center px-4 py-2 rounded-lg text-sm font-medium hover:bg-slate-900 transition duration-150 ease-in-out"
                     >
                       {keyword}
                     </button>
@@ -380,15 +412,15 @@ export default function Home() {
                 </div>
               </div>
               {relatedQuestions.length > 0 && (
-                <div className="mt-6 ">
-                  <h4 className="text-lg font-semibold mb-2 text-secondary">
-                    Famous Nearby {category ? category : "Places"}:
+                <div className="mt-6">
+                  <h4 className="text-3xl font-semibold text-secondary mb-4 astoria-font">
+                    Famous Nearby {category ? category : "Places"}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {relatedQuestions.map((place, index) => (
                       <div
                         key={index}
-                        className="bg-transparent p-4 rounded-lg border-secondary border"
+                        className="bg-transparent p-4 rounded-lg border-secondary/40 border"
                         data-aos="fade-up"
                         data-aos-delay={`${index * 100}`}
                       >
@@ -408,7 +440,7 @@ export default function Home() {
                             </a>
                           </div>
                           <div className="col-span-12 md:text-left text-justify">
-                            <p className="font-bold text-md mb-3 md:mb-0 text-secondary">
+                            <p className="font-bold text-md mb-3 text-xl text-secondary tracking-wider text-center">
                               {place.name}
                             </p>
                             <p className="text-gray-300">{place.info}</p>
@@ -423,6 +455,15 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      <ScrollToTop
+        smooth
+        width="12"
+        height="12"
+        style={scrollButtonStyle}
+        component={<IoIosArrowDropupCircle className="w-8 h-8" />}
+        className="flex justify-center place-items-center bg-secondary"
+      ></ScrollToTop>
     </div>
   );
 }

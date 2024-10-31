@@ -8,7 +8,7 @@
   outline: none;
 }
 body {
-  background-color: #bebebe;
+  @apply bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800
 }
 .main-container {
   display: flex;

@@ -77,10 +77,10 @@ const Banner = () => {
   return (
     <div className="grid grid-cols-12 gap-4 px-8 py-4 bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800 text-white items-center">
       <div className="col-span-12 xl:col-span-7">
-        <p className="text-2xl md:text-6xl font-bold mb-4 astoria-font tracking-wider">
+        <p className="text-2xl md:text-5xl font-bold mb-4 astoria-font tracking-wider">
           Snap It, Type It
         </p>
-        <p className="text-2xl md:text-6xl font-bold mb-4 astoria-font tracking-wider">
+        <p className="text-2xl md:text-5xl font-bold mb-4 astoria-font tracking-wider">
           Explore with <span className="text-secondary">AI</span>
         </p>
         <p className="text-2xl font-medium mt-10 mb-4 astoria-font text-justify text-gray-300">

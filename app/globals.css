@@ -64,7 +64,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground astoria-font;
+    @apply bg-transparent text-foreground astoria-font;
   }
 }
 
@@ -81,3 +81,4 @@
 .astoria-font {
   font-family: 'Astoria Roman', sans-serif;
 }
+
