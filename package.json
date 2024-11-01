@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.17.2",
+    "@szhsin/react-accordion": "^1.2.6",
     "aos": "^2.3.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

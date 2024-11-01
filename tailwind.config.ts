@@ -26,6 +26,7 @@ const config = {
         foreground: "hsl(var(--foreground))",
         primary: "#050609",
         secondary: "#56DFAB",
+        bgTheme: "#10423C",
         tertiary: "#6456DF",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",

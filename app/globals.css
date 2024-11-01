@@ -70,8 +70,8 @@
 
 /* Define the font */
 @font-face {
-  font-family: 'Astoria Roman';
-  src: url('/fonts/astoriaroman/AstoriaRoman.woff') format('woff'); /* adjust as needed */
+  font-family: "Astoria Roman";
+  src: url("/fonts/astoriaroman/AstoriaRoman.woff") format("woff"); /* adjust as needed */
 
   font-weight: normal;
   font-style: normal;
@@ -79,6 +79,42 @@
 
 /* Create a CSS class */
 .astoria-font {
-  font-family: 'Astoria Roman', sans-serif;
+  font-family: "Astoria Roman", sans-serif;
 }
 
+.custom-scrollbar::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  background-color: #f5f5f5;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-500;
+  border-radius: 20px;
+  background-image: -webkit-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.2) 75%,
+    transparent 75%,
+    transparent
+  );
+}
+
+.elevated-card {
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1),
+    /* Bottom shadow */ 0px -4px 8px rgba(0, 0, 0, 0.1),
+    /* Top shadow */ -4px 0px 8px rgba(0, 0, 0, 0.1),
+    /* Left shadow */ 4px 0px 8px rgba(0, 0, 0, 0.1); /* Right shadow */
+}
+
+.elevated-card button{
+  width: 100% !important;
+}

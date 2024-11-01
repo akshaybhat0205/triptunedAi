@@ -1,0 +1,10 @@
+.rotate-180 {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease; /* Adjust timing as needed */
+  }
+  
+  .rotate-0 {
+    transform: rotate(0deg);
+    transition: transform 0.3s ease; /* Ensure consistency */
+  }
+  
