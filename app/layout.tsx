@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Image Identifier",
-  description: "Identify your image using AI",
+  title: "Triptuned",
+  description: "Explore using AI",
 };
 
 export default function RootLayout({

@@ -115,6 +115,13 @@
     /* Left shadow */ 4px 0px 8px rgba(0, 0, 0, 0.1); /* Right shadow */
 }
 
-.elevated-card button{
+.elevated-card button {
   width: 100% !important;
+}
+
+.szh-accordion > div {
+  @apply col-span-12;
+}
+.szh-accordion  {
+  @apply grid grid-cols-12 gap-4 w-full justify-center;
 }

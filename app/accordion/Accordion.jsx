@@ -10,14 +10,14 @@ const CustomAccordion = ({ data, activeIndex, setActiveIndex, textInput }) => {
   };
 
   return (
-    <div data-aos="fade" data-aos-duration="400">
+    <div data-aos="fade" data-aos-duration="400" >
       {" "}
       {/* Apply AOS here */}
       <Accordion>
         {data?.map((item, index) =>
           item.info ? (
             <AccordionItem
-              className="bg-gradient-to-r from-primary to-primary/80 border-b border-secondary/90 shadow-md elevated-card p-3 rounded-2xl mb-3"
+              className=" bg-gradient-to-r from-primary to-primary/80 border-b border-secondary/90 shadow-md elevated-card p-3 rounded-2xl mb-3"
               key={index}
               header={
                 <div

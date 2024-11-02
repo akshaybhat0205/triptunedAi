@@ -39,13 +39,13 @@ const feature = [
 
 const Feature = () => {
   return (
-    <>
+    <div className="grid grid-cols-12 gap-4">
       {feature.map((featureItem, index) => (
         <div
           key={index}
           data-aos-delay={`${index * 100}`}
           data-aos="fade"
-          className="bg-gradient-to-r from-primary to-primary/80 border-b border-secondary/90 shadow-md elevated-card  p-3 rounded-2xl mb-3"
+          className="col-span-12 md:col-span-6 xl:col-span-12 bg-gradient-to-r from-primary to-primary/80 border-b border-secondary/90 shadow-md elevated-card  p-3 rounded-2xl mb-3"
         >
           <div className="flex gap-x-3 items-center mb-1.5">
             <img
@@ -62,7 +62,7 @@ const Feature = () => {
           </p>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 

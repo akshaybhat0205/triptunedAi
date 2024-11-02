@@ -8,7 +8,7 @@
 .banner-image {
   width: 100%;
   height: 100%;
-  object-fit:cover;
+  object-fit: cover;
 }
 
 .overlay {
@@ -36,4 +36,31 @@
   transform: translate(-50%, -50%);
   color: #fff;
   z-index: 1;
+}
+
+.developed-by-content {
+  position: absolute;
+  bottom: 0%;
+  left: 0%;
+  color: #fff;
+  z-index: 1;
+}
+
+@media screen and (max-width: 767px) {
+  .content {
+    width: 100%;
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    z-index: 1;
+  }
+
+  .banner {
+    position: relative;
+    width: 100%;
+    height: 800px; /* Adjust height as needed */
+    overflow: hidden;
+  }
 }

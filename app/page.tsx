@@ -239,7 +239,7 @@ export default function Home() {
   };
   return (
     <div
-      className="min-h-screen bg-slate-800"
+      className="min-h-screen bg-primary/90 xl:bg-slate-800"
       ref={scrollToHome && scrollToHome}
     >
       <div className="grid grid-cols-12 gap-4 mx-auto xl:container xl:py-10">
@@ -252,20 +252,40 @@ export default function Home() {
               scrollToExplore={scrollToExplore}
               scrollToHome={scrollToHome}
             />
+            <div className=" w-full text-lg text-white font-bold my-2  astoria-font tracking-wider developed-by-content px-4 xl:px-8">
+              <div className="flex gap-3 items-center justify-center">
+                <p>
+                  Developed By{" "}
+                  <span className="text-secondary">Akshay Bhat</span>
+                </p>
+                <a
+                  href="https://github.com/akshaybhat0205"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className=" transition duration-150 ease-in-out"
+                >
+                  <img
+                    src="https://img.icons8.com/ios-filled/50/FFFFFF/circled-up-right-2.png"
+                    className="w-6 h-6"
+                    alt="Github"
+                  />
+                </a>
+              </div>
+            </div>
             <div className="content p-4 xl:p-8">
               <h1 className="text-white font-bold astoria-font text-5xl">
-                <p className="text-2xl md:text-4xl text-white font-bold mb-6 astoria-font tracking-wider">
+                <p className="md:text-center xl:text-left text-2xl md:text-4xl text-white font-bold mb-2 md:mb-6 astoria-font tracking-wider">
                   Smart Travel, Zero Hassle
                 </p>
-                <p className="text-2xl md:text-4xl text-white font-bold mb-8 astoria-font tracking-wider">
+                <p className="md:text-center xl:text-left text-2xl md:text-4xl text-white font-bold mb-2 md:mb-6 astoria-font tracking-wider">
                   Guided By Next-Gen <span className="text-secondary">AI</span>
                 </p>
               </h1>
               <div>
                 {/* Option Toggle */}
-                <div className="mb-6 flex">
+                <div className="mt-4 mb-6 flex justify-center xl:justify-start">
                   <button
-                    className={`mr-4 py-2 px-4 rounded-lg font-medium w-44 ${
+                    className={`mr-4 py-3 md:py-2 px-4 rounded-lg text-sm md:text-base font-medium w-44 ${
                       inputType === "image"
                         ? "border-b-2 border-secondary bg-gray-800 text-white"
                         : "bg-gray-800 text-white"
@@ -275,7 +295,7 @@ export default function Home() {
                     Upload Image
                   </button>
                   <button
-                    className={`py-2 px-4 rounded-lg font-medium w-44  ${
+                    className={`py-3 md:py-2 px-4 rounded-lg text-sm md:text-base font-medium w-44  ${
                       inputType === "text"
                         ? "border-b-2 border-secondary bg-gray-800 text-white"
                         : "bg-gray-800 text-white"
@@ -285,14 +305,14 @@ export default function Home() {
                     Enter Place Name
                   </button>
                 </div>
-                <div className="grid grid-cols-12 gap-4 items-center max-w-4xl mx-auto">
+                <div className="grid grid-cols-12 gap-2 md:gap-4 items-center md:max-w-3xl max-w-4xl xl:mx-0 md:mx-auto">
                   <div className="md:col-span-5 col-span-12">
                     {/* Image Upload */}
                     {inputType === "image" && (
-                      <div className="mb-8">
+                      <div className="md:mb-8">
                         <label
                           htmlFor="image-upload"
-                          className="block text-sm font-medium text-white mb-2"
+                          className="block text-sm md:text-base font-medium text-white mb-2"
                         >
                           Upload an image
                         </label>
@@ -308,10 +328,10 @@ export default function Home() {
 
                     {/* Text Input */}
                     {inputType === "text" && (
-                      <div className="mb-8">
+                      <div className="mb-4 md:mb-4">
                         <label
                           htmlFor="text-input"
-                          className="block text-sm font-medium text-gray-300 mb-2"
+                          className="block text-sm md:text-base font-medium text-gray-300 mb-2"
                         >
                           Enter the name of place
                         </label>
@@ -319,7 +339,7 @@ export default function Home() {
                           id="text-input"
                           value={textInput}
                           onChange={(e) => setTextInput(e.target.value)}
-                          className="w-full p-2 border bg-white rounded-lg text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full text-sm p-2 border bg-white rounded-lg text-gray-700 focus:ring-blue-500 focus:border-blue-500"
                           placeholder="Write the name of place..."
                         ></input>
                       </div>
@@ -327,7 +347,7 @@ export default function Home() {
                   </div>
                   <div className="md:col-span-5 col-span-12">
                     {/* Category Dropdown */}
-                    <div className="mb-8">
+                    <div className="mb-4 md:mb-4">
                       <label
                         htmlFor="category"
                         className="block text-sm font-medium text-gray-300 mb-2"
@@ -339,7 +359,7 @@ export default function Home() {
                         name="category"
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full p-2.5 text-base text-primary border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        className="w-full p-2.5 text-sm md:text-base text-primary border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                       >
                         <option value="">No Thoughts</option>
                         <option value="Museums">Museums</option>
@@ -350,7 +370,7 @@ export default function Home() {
                       </select>
                     </div>
                   </div>
-                  <div className="col-span-12 md:col-span-2 align-self-end ">
+                  <div className="col-span-12 md:col-span-2 align-self-end text-center">
                     <button
                       onClick={() => identifyImageOrText()}
                       disabled={
@@ -358,7 +378,7 @@ export default function Home() {
                         (inputType === "text" && !textInput.trim()) ||
                         loading
                       }
-                      className="w-full bg-tertiary text-white py-2 px-4 rounded-lg md:rounded-r-full hover:bg-tertiary/80 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
+                      className="w-24 text-center md:w-full  bg-tertiary  text-sm md:text-base text-white md:py-2.5 py-2  px-4 rounded-lg md:rounded-r-full hover:bg-tertiary/80 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-medium md:mt-4"
                     >
                       {loading ? "Searching..." : "Search"}
                     </button>
@@ -366,9 +386,9 @@ export default function Home() {
                 </div>
               </div>
               {result && relatedQuestions.length > 0 && (
-                <div className="relative">
+                <div className="relative mt-8 md:mt-0">
                   <div
-                    className="absolute top-0 left-0 w-full max-h-[200px] overflow-y-auto custom-scrollbar mb-3 p-4 rounded-2xl shadow-lg border-b border-secondary bg-gradient-to-t from-primary to-primary/30"
+                    className="absolute top-0 left-0 w-full md:max-h-[200px] max-h-[250px] overflow-y-auto custom-scrollbar mb-3 p-4 rounded-xl shadow-lg border-b border-secondary bg-primary"
                     style={{
                       zIndex: 10,
                     }}
@@ -377,8 +397,10 @@ export default function Home() {
                       result.split("\n").length > 0 &&
                       result.split("\n").map((line, index) => (
                         <div key={index}>
-                          <div className="text-gray-200 font-light text-sm">
-                            <p className="mb-2 text-gray-300 text-lg">{line}</p>
+                          <div className="text-gray-200 font-light ">
+                            <p className="mb-2 md:text-gray-300 text-white text-base md:text-lg">
+                              {line}
+                            </p>
                           </div>
                         </div>
                       ))}
@@ -388,10 +410,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <div className="col-span-12 xl:col-span-4 bg-transparent rounded-2xl xl:max-h-[650px]">
+        <div className="col-span-12 xl:col-span-4 bg-transparent pt-8 xl:pt-0 rounded-2xl xl:max-h-[650px]">
           {result && relatedQuestions.length > 0 ? (
             <div data-aos="fade" data-aos-duration="400">
-              <p className="text-secondary text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
+              <p className="text-secondary md:text-center xl:text-left text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
                 Nearby {category ? category : "Places"}
               </p>
               <div className="max-h-[600px] overflow-auto custom-scrollbar px-4">
@@ -405,7 +427,7 @@ export default function Home() {
             </div>
           ) : (
             <div data-aos="fade" data-aos-duration="400">
-              <p className="text-secondary text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
+              <p className="text-secondary md:text-center xl:text-left text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
                 Features
               </p>
               <div className="max-h-[600px] overflow-auto custom-scrollbar px-4">
