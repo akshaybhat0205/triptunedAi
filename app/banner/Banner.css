@@ -2,13 +2,13 @@
 /* CSS Document */
 
 /******* Common Element CSS Start ******/
-* {
+.banner-graphic * {
   margin: 0px;
   padding: 0px;
   outline: none;
 }
-body {
-  @apply bg-gradient-to-br  md:bg-gradient-to-r from-primary to-slate-800
+.banner-graphic {
+  @apply bg-gradient-to-br md:bg-gradient-to-r from-primary to-slate-800;
 }
 .main-container {
   display: flex;

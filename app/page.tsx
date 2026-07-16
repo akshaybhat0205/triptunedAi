@@ -1,32 +1,16 @@
 "use client";
 
-import {
-  AwaitedReactNode,
-  JSXElementConstructor,
-  Key,
-  ReactElement,
-  ReactNode,
-  ReactPortal,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import Image from "next/image";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import Banner from "./banner/Banner";
-import AOS from "aos"; // Import AOS
-import "aos/dist/aos.css"; // Import AOS CSS
-import HomeBanner from "./banner/HomeBanner";
+import { useEffect, useRef, useState } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 import "./banner/HomeBanner.css";
+import "./styles/glass.css";
 import Header from "./banner/Header";
-import ScrollToTop from "react-scroll-to-top";
-import { IoIosArrowDropupCircle } from "react-icons/io";
 import CustomAccordian from "./accordion/Accordion";
 import Feature from "./features/Feature";
 
 export default function Home() {
-  const [image, setImage] = useState<File | null>(null);
-  const [textInput, setTextInput] = useState<string>(""); // For text input
+  const [textInput, setTextInput] = useState<string>("");
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [keywords, setKeywords] = useState<string[]>([]);
@@ -34,8 +18,23 @@ export default function Home() {
   const [relatedQuestions, setRelatedQuestions] = useState<
     { name: string; link: string; info: string }[]
   >([]);
-  const [inputType, setInputType] = useState<"image" | "text">("image"); // Toggle between image and text input
-  const [category, setCategory] = useState<string>(""); // State for selected category
+  const [category, setCategory] = useState<string>("");
+  const [searchMode, setSearchMode] = useState<"name" | "gps">("name");
+  const [locationStatus, setLocationStatus] = useState<string>("");
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const categoryOptions = [
+    "No Thoughts",
+    "Museums",
+    "Monuments",
+    "Holy Places",
+    "Beaches",
+    "Hotels",
+    "Restaurants",
+    "Cafes",
+    "Cinemas",
+    "Party Clubs",
+  ];
+  const categoryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     AOS.init({
@@ -46,76 +45,161 @@ export default function Home() {
     });
     AOS.refresh();
   }, []);
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
-    }
-  };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        categoryRef.current &&
+        !categoryRef.current.contains(event.target as Node)
+      ) {
+        setIsCategoryOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   const identifyImageOrText = async (additionalPrompt: string = "") => {
     setLoading(true);
 
-    if (inputType === "image" && image) {
-      await identifyImage(additionalPrompt);
-    } else if (inputType === "text" && textInput.trim()) {
+    if (searchMode === "gps") {
+      await useCurrentLocation(additionalPrompt);
+    } else if (textInput.trim()) {
       await identifyText(textInput, additionalPrompt);
     }
 
     setLoading(false);
   };
 
-  const identifyImage = async (additionalPrompt: string = "") => {
-    if (!image) return;
-
-    const genAI = new GoogleGenerativeAI(
-      process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY!
-    );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    try {
-      const imageParts = await fileToGenerativePart(image);
-      const result = await model.generateContent([
-        `Identify the place in the image and provide information ${additionalPrompt}`,
-        imageParts,
-      ]);
-      const response = await result.response;
-      const text = formatResponseText(response);
-      setResult(text);
-      generateKeywords(text);
-      await generateRelatedQuestions("image", text);
-      setActiveIndex(null);
-    } catch (error) {
-      handleError(error);
+  const useCurrentLocation = async (additionalPrompt: string = "") => {
+    if (!navigator.geolocation) {
+      setLocationStatus("Geolocation is not supported by this browser.");
+      setResult("Geolocation is not supported by this browser.");
+      return;
     }
+    setLocationStatus("Getting your current location...");
+
+    return new Promise<void>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const infoFormData = new FormData();
+            infoFormData.append(
+              "text",
+              `GPS coordinates: latitude=${latitude}, longitude=${longitude}. Provide both a short paragraph describing the current location and a separate nearby places section with 6 to 8 items in this exact format:\nName: Short description\nDo not use bullets, numbering, or bold text. Use plain text only. Category: ${category || "tourist spots"}.`,
+            );
+            infoFormData.append("additionalPrompt", additionalPrompt);
+            infoFormData.append("mode", "gps");
+
+            const infoResponse = await fetch("/api/identify-image", {
+              method: "POST",
+              body: infoFormData,
+            });
+
+            let infoData: any = {};
+            try {
+              infoData = await infoResponse.json();
+            } catch {
+              infoData = {};
+            }
+
+            if (!infoResponse.ok) {
+              throw new Error(
+                infoData.error || "Unable to identify the current location.",
+              );
+            }
+
+            const responseText = formatResponseText(
+              (infoData.result ||
+                infoData.relatedQuestions?.join("\n") ||
+                "") as string,
+            );
+            if (!responseText) {
+              throw new Error("No location information was returned.");
+            }
+
+            const { summary, places } = parseGpsResponse(responseText);
+            setResult(summary);
+            generateKeywords(summary);
+            setRelatedQuestions(places);
+            setActiveIndex(null);
+            setLocationStatus(
+              `Using your current location: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+            );
+            resolve();
+          } catch (error) {
+            handleError(error);
+            setLocationStatus(
+              "Unable to fetch nearby places from your current location.",
+            );
+            resolve();
+          }
+        },
+        (error) => {
+          const message =
+            error instanceof GeolocationPositionError
+              ? error.message
+              : "Location access failed.";
+          setLocationStatus(`Location access failed: ${message}`);
+          setResult(`Location access failed: ${message}`);
+          resolve();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+      );
+    });
   };
 
   const identifyText = async (
-    textInput: string,
-    additionalPrompt: string = ""
+    textInputValue: string,
+    additionalPrompt: string = "",
   ) => {
-    const genAI = new GoogleGenerativeAI(
-      process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY!
-    );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     try {
-      const result = await model.generateContent([
-        `Identify the place based on the following description and provide a paragraph of information ${additionalPrompt}: ${textInput}`,
-      ]);
-      const response = await result.response;
-      const text = formatResponseText(response);
-      setResult(text);
-      generateKeywords(text);
-      await generateRelatedQuestions("input", text);
+      const formData = new FormData();
+      formData.append(
+        "text",
+        `Place name: ${textInputValue}. Provide both a short paragraph describing the place and a separate nearby places section with 6 to 8 items in this exact format:\nName: Short description\nDo not use bullets, numbering, or bold text. Use plain text only. Category: ${category || "tourist spots"}.`,
+      );
+      formData.append("additionalPrompt", additionalPrompt);
+      formData.append("mode", "name");
+
+      const response = await fetch("/api/identify-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      let data: any = {};
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to identify the place.");
+      }
+
+      const responseText = formatResponseText(
+        (data.result || data.relatedQuestions?.join("\n") || "") as string,
+      );
+      if (!responseText) {
+        throw new Error("No place information was returned.");
+      }
+
+      const { summary, places } = parseGpsResponse(responseText);
+      setResult(summary);
+      generateKeywords(summary);
+      setRelatedQuestions(places);
       setActiveIndex(null);
     } catch (error) {
       handleError(error);
     }
   };
 
-  const formatResponseText = (response: any): string => {
-    return response
-      .text()
+  const formatResponseText = (text: string): string => {
+    return text
       .trim()
       .replace(/```/g, "")
       .replace(/\*\*/g, "")
@@ -124,12 +208,21 @@ export default function Home() {
       .replace(/\n\s*\n/g, "\n");
   };
 
-  const handleError = (error: any) => {
+  const handleError = (error: unknown) => {
     console.error("Error identifying:", error);
-    if (error instanceof Error) {
-      setResult(`Error: ${error.message}`);
+    const message =
+      error instanceof Error ? error.message : "An unknown error occurred.";
+
+    if (
+      message.toLowerCase().includes("quota") ||
+      message.toLowerCase().includes("resource_exhausted") ||
+      message.toLowerCase().includes("429")
+    ) {
+      setResult(
+        "Gemini API quota exceeded. Please wait a few minutes and try again.",
+      );
     } else {
-      setResult("An unknown error occurred.");
+      setResult(`Error: ${message}`);
     }
   };
 
@@ -151,77 +244,103 @@ export default function Home() {
     identifyImageOrText(`Focus more on aspects related to "${keyword}".`);
   };
 
-  const generateRelatedQuestions = async (type: string, text: string) => {
-    const genAI = new GoogleGenerativeAI(
-      process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY!
-    );
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const parseGpsResponse = (responseText: string) => {
+    const lines = responseText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
 
+    const summaryLines: string[] = [];
+    const places: { name: string; link: string; info: string }[] = [];
+
+    lines.forEach((line) => {
+      if (
+        line.toLowerCase().startsWith("nearby") ||
+        line.toLowerCase().startsWith("places")
+      ) {
+        return;
+      }
+
+      const separatorIndex = line.indexOf(":");
+      if (separatorIndex >= 0 && !line.toLowerCase().includes("summary")) {
+        const name = line.slice(0, separatorIndex).trim();
+        const info = line.slice(separatorIndex + 1).trim();
+        if (name && info) {
+          places.push({
+            name,
+            info,
+            link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name)}`,
+          });
+        }
+      } else {
+        summaryLines.push(line);
+      }
+    });
+
+    return {
+      summary: summaryLines.join("\n"),
+      places,
+    };
+  };
+
+  const generateRelatedQuestions = async (type: string, text: string) => {
     try {
-      const result = await model.generateContent([
-        `identify the place or any minimum 4 max 8 famous nearby ${
-          category ? category : "tourist spots"
-        } which are in range of 10-25km and add a paragraph about the information:
-        ${type === "image" ? text : textInput}
-        output only name and info of ${
-          category ? category : "tourist spots"
-        } as a simple list.`,
-      ]);
-      const response = await result.response;
-      const places = response.text().trim().split("\n");
+      const formData = new FormData();
+      formData.append("mode", "related");
+      formData.append("category", category || "tourist spots");
+      formData.append("text", type === "image" ? text : textInput);
+
+      const response = await fetch("/api/identify-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to fetch nearby places.");
+      }
+
+      const places = Array.isArray(data.relatedQuestions)
+        ? data.relatedQuestions
+        : [];
 
       const questionsWithLinks = places
-        .slice(1)
-        .map((place) => place.trim())
-        .filter((place) => place !== "")
-        .map((place) => {
-          const cleanedPlace = place.replace(/\*|\*\*/g, "");
-          const [name, info] = cleanedPlace
-            .split(":")
-            .map((part) => part.trim());
+        .map((place: string) => place.trim())
+        .filter((place: string) => place !== "")
+        .map((place: string) => {
+          const cleanedPlace = place.replace(/^\d+\.\s*/, "").trim();
+          const separatorIndex = cleanedPlace.indexOf(":");
+          const name =
+            separatorIndex >= 0
+              ? cleanedPlace.slice(0, separatorIndex).trim()
+              : cleanedPlace;
+          const info =
+            separatorIndex >= 0
+              ? cleanedPlace.slice(separatorIndex + 1).trim()
+              : "";
+
           return {
             name: name || cleanedPlace,
-            info: info || "",
+            info,
             link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              name || cleanedPlace
+              name || cleanedPlace,
             )}`,
           };
         });
 
       setRelatedQuestions(questionsWithLinks);
-    } catch (error) {
+    } catch {
       setRelatedQuestions([]);
     }
   };
 
-  async function fileToGenerativePart(file: File): Promise<{
-    inlineData: { data: string; mimeType: string };
-  }> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        const base64Content = base64data.split(",")[1];
-        resolve({
-          inlineData: {
-            data: base64Content,
-            mimeType: file.type,
-          },
-        });
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  const handleInputTypeChange = (type: "image" | "text") => {
-    // Reset results and related information when input type changes
-    setInputType(type);
-    setImage(null);
+  const resetSearch = () => {
     setTextInput("");
     setResult(null);
     setKeywords([]);
     setRelatedQuestions([]);
+    setLocationStatus("");
+    setCategory("");
   };
   console.log("relatedQuestions", relatedQuestions);
 
@@ -237,41 +356,18 @@ export default function Home() {
     width: "32px",
     height: "32px",
   };
+  const isGpsAvailable =
+    typeof navigator !== "undefined" && !!navigator.geolocation;
   return (
-    <div
-      className="min-h-screen bg-primary/90 xl:bg-slate-800"
-      ref={scrollToHome && scrollToHome}
-    >
+    <div className="min-h-screen" ref={scrollToHome && scrollToHome}>
       <div className="grid grid-cols-12 gap-4 mx-auto xl:container xl:py-10">
         <div className="col-span-12 xl:col-span-8  rounded-2xl">
           <div className="banner xl:rounded-2xl">
-            <img src="./res.jpg" alt="Banner" className="banner-image" />
-            <div className="overlay"></div>
             <Header
               scrollToFeatures={scrollToFeatures}
               scrollToExplore={scrollToExplore}
               scrollToHome={scrollToHome}
             />
-            <div className=" w-full text-lg text-white font-bold my-2  astoria-font tracking-wider developed-by-content px-4 xl:px-8">
-              <div className="flex gap-3 items-center justify-center">
-                <p>
-                  Developed By{" "}
-                  <span className="text-secondary">Akshay Bhat</span>
-                </p>
-                <a
-                  href="https://github.com/akshaybhat0205"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className=" transition duration-150 ease-in-out"
-                >
-                  <img
-                    src="https://img.icons8.com/ios-filled/50/FFFFFF/circled-up-right-2.png"
-                    className="w-6 h-6"
-                    alt="Github"
-                  />
-                </a>
-              </div>
-            </div>
             <div className="content p-4 xl:p-8">
               <h1 className="text-white font-bold astoria-font text-5xl">
                 <p className="md:text-center xl:text-left text-2xl md:text-4xl text-white font-bold mb-2 md:mb-6 astoria-font tracking-wider">
@@ -282,68 +378,55 @@ export default function Home() {
                 </p>
               </h1>
               <div>
-                {/* Option Toggle */}
                 <div className="mt-4 mb-6 flex justify-center xl:justify-start">
                   <button
-                    className={`mr-4 py-3 md:py-2 px-4 rounded-lg text-sm md:text-base font-medium w-44 ${
-                      inputType === "image"
-                        ? "border-b-2 border-secondary bg-gray-800 text-white"
-                        : "bg-gray-800 text-white"
+                    className={`mr-4 glass-btn glass-toggle ${
+                      searchMode === "name" ? "active-name" : ""
                     }`}
-                    onClick={() => handleInputTypeChange("image")}
+                    onClick={() => {
+                      setSearchMode("name");
+                      resetSearch();
+                    }}
                   >
-                    Upload Image
+                    Search by Name
                   </button>
                   <button
-                    className={`py-3 md:py-2 px-4 rounded-lg text-sm md:text-base font-medium w-44  ${
-                      inputType === "text"
-                        ? "border-b-2 border-secondary bg-gray-800 text-white"
-                        : "bg-gray-800 text-white"
+                    className={`glass-btn glass-toggle ${
+                      searchMode === "gps" ? "active-gps" : ""
                     }`}
-                    onClick={() => handleInputTypeChange("text")}
+                    onClick={() => {
+                      setSearchMode("gps");
+                      resetSearch();
+                    }}
                   >
-                    Enter Place Name
+                    Use GPS Location
                   </button>
                 </div>
                 <div className="grid grid-cols-12 gap-2 md:gap-4 items-center md:max-w-3xl max-w-4xl xl:mx-0 md:mx-auto">
                   <div className="md:col-span-5 col-span-12">
-                    {/* Image Upload */}
-                    {inputType === "image" && (
-                      <div className="md:mb-8">
-                        <label
-                          htmlFor="image-upload"
-                          className="block text-sm md:text-base font-medium text-white mb-2"
-                        >
-                          Upload an image
-                        </label>
-                        <input
-                          type="file"
-                          id="image-upload"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-tertiary hover:file:bg-blue-100 transition duration-150 ease-in-out"
-                        />
-                      </div>
-                    )}
-
-                    {/* Text Input */}
-                    {inputType === "text" && (
-                      <div className="mb-4 md:mb-4">
-                        <label
-                          htmlFor="text-input"
-                          className="block text-sm md:text-base font-medium text-gray-300 mb-2"
-                        >
-                          Enter the name of place
-                        </label>
+                    <div className="mb-4 md:mb-4">
+                      <label
+                        htmlFor="text-input"
+                        className="block text-sm md:text-base font-medium text-gray-300 mb-2"
+                      >
+                        {searchMode === "name"
+                          ? "Enter the name of place"
+                          : "Current location search"}
+                      </label>
+                      {searchMode === "name" ? (
                         <input
                           id="text-input"
                           value={textInput}
                           onChange={(e) => setTextInput(e.target.value)}
-                          className="w-full text-sm p-2 border bg-white rounded-lg text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+                          className="glass-input"
                           placeholder="Write the name of place..."
-                        ></input>
-                      </div>
-                    )}
+                        />
+                      ) : (
+                        <div className="glass-input">
+                          Use current GPS location
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="md:col-span-5 col-span-12">
                     {/* Category Dropdown */}
@@ -354,41 +437,75 @@ export default function Home() {
                       >
                         Select a Category
                       </label>
-                      <select
-                        id="category"
-                        name="category"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full p-2.5 text-sm md:text-base text-primary border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                      >
-                        <option value="">No Thoughts</option>
-                        <option value="Museums">Museums</option>
-                        <option value="Monuments">Monuments</option>
-                        <option value="Holy Places">Holy Places</option>
-                        <option value="Beaches">Beaches</option>
-                        <option value="Hotels">Hotels</option>
-                      </select>
+                      <div className="relative" ref={categoryRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsCategoryOpen((prev) => !prev)}
+                          className="glass-select flex items-center justify-between"
+                        >
+                          <span>{category || "No Thoughts"}</span>
+                          <span className="ml-2">▾</span>
+                        </button>
+                        {isCategoryOpen && (
+                          <div className="absolute z-20 mt-2 w-full max-h-56 overflow-y-auto custom-scrollbar rounded-xl border border-white/10 bg-slate-950/95 shadow-2xl backdrop-blur-xl">
+                            {categoryOptions.map((optionValue) => {
+                              const value =
+                                optionValue === "No Thoughts"
+                                  ? ""
+                                  : optionValue;
+                              const selected = value === category;
+                              return (
+                                <button
+                                  key={optionValue}
+                                  type="button"
+                                  onClick={() => {
+                                    setCategory(value);
+                                    setIsCategoryOpen(false);
+                                  }}
+                                  className={`w-full px-4 py-3 text-left text-sm text-white transition hover:bg-slate-900/70 flex items-center justify-between ${
+                                    selected ? "bg-slate-900/70" : ""
+                                  }`}
+                                >
+                                  <span>{optionValue}</span>
+                                  {selected && (
+                                    <span className="text-secondary">✓</span>
+                                  )}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="col-span-12 md:col-span-2 align-self-end text-center">
                     <button
                       onClick={() => identifyImageOrText()}
                       disabled={
-                        (inputType === "image" && !image) ||
-                        (inputType === "text" && !textInput.trim()) ||
+                        (searchMode === "name" && !textInput.trim()) ||
+                        (searchMode === "gps" && !isGpsAvailable) ||
                         loading
                       }
-                      className="w-24 text-center md:w-full  bg-tertiary  text-sm md:text-base text-white md:py-2.5 py-2  px-4 rounded-lg md:rounded-r-full hover:bg-tertiary/80 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-medium md:mt-4"
+                      className={`w-24 text-center md:w-full glass-action ${
+                        searchMode === "name"
+                          ? "glass-action--name"
+                          : "glass-action--gps"
+                      } text-sm md:text-base md:py-2.5 py-2 px-4 rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed font-medium md:mt-4`}
                     >
                       {loading ? "Searching..." : "Search"}
                     </button>
                   </div>
                 </div>
               </div>
+              {locationStatus && (
+                <div className="mt-4 text-sm text-gray-200">
+                  {locationStatus}
+                </div>
+              )}
               {result && relatedQuestions.length > 0 && (
                 <div className="relative mt-8 md:mt-0">
                   <div
-                    className="absolute top-0 left-0 w-full md:max-h-[200px] max-h-[250px] overflow-y-auto custom-scrollbar mb-3 p-4 rounded-xl shadow-lg border-b border-secondary bg-primary"
+                    className="absolute top-0 left-0 w-full md:max-h-[200px] max-h-[250px] overflow-y-auto custom-scrollbar mb-3 glass-panel"
                     style={{
                       zIndex: 10,
                     }}
@@ -413,7 +530,7 @@ export default function Home() {
         <div className="col-span-12 xl:col-span-4 bg-transparent pt-8 xl:pt-0 rounded-2xl xl:max-h-[650px]">
           {result && relatedQuestions.length > 0 ? (
             <div data-aos="fade" data-aos-duration="400">
-              <p className="text-secondary md:text-center xl:text-left text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
+              <p className="text-white md:text-center xl:text-left text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
                 Nearby {category ? category : "Places"}
               </p>
               <div className="max-h-[600px] overflow-auto custom-scrollbar px-4">
@@ -422,12 +539,13 @@ export default function Home() {
                   activeIndex={activeIndex}
                   setActiveIndex={setActiveIndex}
                   textInput={textInput}
+                  category={category}
                 />
               </div>
             </div>
           ) : (
             <div data-aos="fade" data-aos-duration="400">
-              <p className="text-secondary md:text-center xl:text-left text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
+              <p className="text-white md:text-center xl:text-left text-4xl astoria-font tracking-widest font-bold mb-4 px-4">
                 Features
               </p>
               <div className="max-h-[600px] overflow-auto custom-scrollbar px-4">

@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    --bg-overlay: 0.7;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
@@ -32,29 +33,31 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
+    /* Space-themed dark palette */
+    --bg-overlay: 0.85;
+    --background: 220 20% 6%; /* deep navy */
+    --foreground: 210 16% 96%; /* near-white */
+    --card: 216 18% 8%;
+    --card-foreground: 210 16% 96%;
+    --popover: 216 18% 8%;
+    --popover-foreground: 210 16% 96%;
+    --primary: 206 95% 62%; /* electric blue */
+    --primary-foreground: 210 16% 96%;
+    --secondary: 214 80% 50%; /* blue used by glass action */
+    --secondary-foreground: 210 16% 96%;
+    --muted: 215 18% 10%;
+    --muted-foreground: 215 12% 70%;
+    --accent: 185 90% 60%; /* cyan accent */
+    --accent-foreground: 210 16% 96%;
+    --destructive: 350 70% 50%;
+    --destructive-foreground: 210 16% 96%;
+    --border: 215 40% 14%;
+    --input: 216 18% 8%;
+    --ring: 206 95% 62%;
+    --chart-1: 206 95% 62%;
+    --chart-2: 190 70% 45%;
+    --chart-3: 260 70% 50%;
+    --chart-4: 230 65% 55%;
     --chart-5: 340 75% 55%;
   }
 }
@@ -64,7 +67,20 @@
     @apply border-border;
   }
   body {
-    @apply bg-transparent text-foreground astoria-font;
+    @apply text-foreground astoria-font;
+    /* Page background image (global) with subtle overlay glows */
+    background-image:
+      linear-gradient(
+        rgba(6, 12, 26, var(--bg-overlay)),
+        rgba(6, 10, 16, var(--bg-overlay))
+      ),
+      url("/res.jpg");
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -82,34 +98,30 @@
   font-family: "Astoria Roman", sans-serif;
 }
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-  background-color: #f5f5f5;
-  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  background-color: #f5f5f5;
+  width: 4px;
+  background-color: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-500;
-  border-radius: 20px;
-  background-image: -webkit-linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.2) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255, 255, 255, 0.2) 50%,
-    rgba(255, 255, 255, 0.2) 75%,
-    transparent 75%,
-    transparent
-  );
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .elevated-card {
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1),
+  box-shadow:
+    0px 4px 8px rgba(0, 0, 0, 0.1),
     /* Bottom shadow */ 0px -4px 8px rgba(0, 0, 0, 0.1),
     /* Top shadow */ -4px 0px 8px rgba(0, 0, 0, 0.1),
     /* Left shadow */ 4px 0px 8px rgba(0, 0, 0, 0.1); /* Right shadow */
@@ -122,6 +134,6 @@
 .szh-accordion > div {
   @apply col-span-12;
 }
-.szh-accordion  {
+.szh-accordion {
   @apply grid grid-cols-12 gap-4 w-full justify-center;
 }

@@ -1,66 +1,72 @@
-# Image Identifier
+# TripTuned AI
 
 ## Project Overview
 
-This Image Identifier is a web application built with Next.js that uses Google's Gemini AI to analyze and provide detailed information about uploaded images. The app offers a user-friendly interface for image upload, displays AI-generated information about the image, and provides related keywords and questions for further exploration.
+TripTuned AI is a smart travel assistant built with Next.js that helps users explore destinations using either place name search or GPS location. It leverages AI to generate concise destination summaries and nearby place recommendations while keeping the interface simple and travel-focused.
 
 ## Features
 
-- Image upload and preview
-- AI-powered image analysis using Google Gemini API
-- Detailed information display about the identified image
-- Related keywords generation for further exploration
-- AI-generated related questions about the image
-- Responsive design for various screen sizes
+- Search by place name or use current GPS location
+- Category selection with a default "No Thoughts" option
+- Intelligent AI-generated location summaries and nearby place suggestions
+- Search button disabled while waiting for GPS location or name input
+- Responsive, glassmorphism-inspired UI for a polished travel experience
 
 ## Tech Stack
 
-- Next.js 14 (React framework)
+- Next.js (React framework)
 - TypeScript
 - Tailwind CSS for styling
 - Google Generative AI (Gemini API)
 
-## Key Functionalities
+## How It Works
 
-1. **Image Upload**: Users can upload an image through the `ImageUploader` component.
-2. **Image Analysis**: The uploaded image is sent to the Gemini AI API for analysis.
-3. **Information Display**: The AI-generated information about the image is displayed in the `ResultDisplay` component.
-4. **Related Keywords**: The app extracts and displays related keywords from the AI response.
-5. **Related Questions**: The app generates and displays related questions about the image using a separate AI query.
-6. **Regenerate Content**: Users can click on keywords to regenerate content with a focus on that specific aspect.
-7. **Ask Related Questions**: Users can click on generated questions to get more specific information about the image.
+1. **Choose a search mode**: Users can select either `Search by Name` or `Use GPS Location`.
+2. **Enter a place name**: In name mode, type a location and optionally choose a category.
+3. **Use GPS**: In GPS mode, the app requests current location permission and uses coordinates to generate nearby points of interest.
+4. **AI-powered results**: The app sends the search request to the backend AI route and receives a clear summary plus nearby places in a consistent format.
+5. **Nearby places panel**: Results appear with suggested destinations and links for further exploration.
 
 ## Setup and Installation
 
 1. Clone the repository
-2. Install dependencies: `npm install`
+2. Install dependencies:
+
+```bash
+npm install
+```
+
 3. Set up environment variables:
    - Create a `.env.local` file in the root directory
    - Add your Google Gemini API key: `NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY=your_api_key_here`
-4. Run the development server: `npm run dev`
+4. Run the development server:
+
+```bash
+npm run dev
+```
+
 5. Open `http://localhost:3000` in your browser
 
 ## Deployment
 
-This project can be easily deployed on platforms like Vercel or Netlify. Make sure to set up the environment variables in your deployment platform's settings.
+Deploy on Vercel, Netlify, or any platform that supports Next.js. Configure the required environment variables in deployment settings.
 
-## Future Improvements
+## Project Notes
 
-- Implement user authentication for personalized experiences
-- Add image categorization and tagging features
-- Implement a gallery of previously analyzed images
-- Optimize performance for faster image processing
-- Add multi-language support for global users
-
+- Category resets to default when switching between name and GPS search modes.
+- GPS search shows a disabled state while fetching current location.
+- The app uses AI prompts to keep responses short, travel-centered, and formatted for readability.
 
 ## License
 
 This project is licensed under the MIT License.
 
-## Landing Page
+## Screenshots
 
-![Image of the project](./snap/image1.png)
+### Landing page
 
-## After image analysis
+![Landing page](./snap/image1.png)
 
-![Image of the project](./snap/image2.png)
+### Search results view
+
+![Search results view](./snap/image2.png)

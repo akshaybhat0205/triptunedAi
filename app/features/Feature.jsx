@@ -16,9 +16,9 @@ const feature = [
   {
     src: "https://img.icons8.com/parakeet-line/80/FFFFFF/add-image.png",
     alt: "Upload Image",
-    title: "Upload Image",
+    title: "Search using GPS",
     description:
-      "Simply upload a photo to reveal the story behind every place you encounter",
+      "Simply provide access to your location to unlock personalized recommendations and insights",
   },
   {
     src: "https://img.icons8.com/pastel-glyph/80/FFFFFF/search--v2.png",
@@ -37,6 +37,8 @@ const feature = [
   },
 ];
 
+import "../styles/glass.css";
+
 const Feature = () => {
   return (
     <div className="grid grid-cols-12 gap-4" data-aos="fade">
@@ -44,20 +46,19 @@ const Feature = () => {
         <div
           key={index}
           data-aos-delay={`${index * 100}`}
-          className="col-span-12 md:col-span-6 xl:col-span-12 bg-gradient-to-r from-primary to-primary/80 border-b border-secondary/90 shadow-md elevated-card  p-3 rounded-2xl 
-          "
+          className="col-span-12 md:col-span-6 xl:col-span-12 glass-card"
         >
           <div className="flex gap-x-3 items-center mb-1.5">
             <img
               src={featureItem.src}
-              className="py-1 px-2 bg-tertiary/80 rounded-full w-9 h-9 object-contain"
+              className="feature-avatar"
               alt={featureItem.alt}
             />
-            <h1 className="text-lg font-semibold text-white">
+            <h1 className="text-lg font-semibold feature-title">
               {featureItem.title}
             </h1>
           </div>
-          <p className="text-gray-200 font-light text-sm">
+          <p className="feature-desc font-light text-sm">
             {featureItem.description}
           </p>
         </div>
