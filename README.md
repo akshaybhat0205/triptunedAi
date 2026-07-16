@@ -36,7 +36,10 @@ TripTuned AI is a smart travel assistant built with Next.js that helps users exp
 npm install
 ```
 
-3. Set up environment variables:
+3. Ensure your local Node.js version is 20 or higher.
+   - If you use nvm: `nvm install 20 && nvm use 20`
+
+4. Set up environment variables:
    - Create a `.env.local` file in the root directory
    - Add your Google Gemini API key: `NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY=your_api_key_here`
 4. Run the development server:
@@ -49,7 +52,7 @@ npm run dev
 
 ## Deployment
 
-Deploy on Vercel, Netlify, or any platform that supports Next.js. Configure the required environment variables in deployment settings.
+Deploy on Vercel, Netlify, or any platform that supports Next.js. Configure the required environment variables in deployment settings, and use Node 20+ for builds.
 
 ## Project Notes
 
