@@ -65,7 +65,7 @@ export default function Home() {
     setLoading(true);
 
     if (searchMode === "gps") {
-      await useCurrentLocation(additionalPrompt);
+      await fetchCurrentLocation(additionalPrompt);
     } else if (textInput.trim()) {
       await identifyText(textInput, additionalPrompt);
     }
@@ -73,7 +73,7 @@ export default function Home() {
     setLoading(false);
   };
 
-  const useCurrentLocation = async (additionalPrompt: string = "") => {
+  const fetchCurrentLocation = async (additionalPrompt: string = "") => {
     if (!navigator.geolocation) {
       setLocationStatus("Geolocation is not supported by this browser.");
       setResult("Geolocation is not supported by this browser.");
