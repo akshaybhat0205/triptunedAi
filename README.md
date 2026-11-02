@@ -41,7 +41,7 @@ npm install
 
 4. Set up environment variables:
    - Create a `.env.local` file in the root directory
-   - Add your Google Gemini API key: `NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY=your_api_key_here`
+   - Add your Google Gemini API key: `GOOGLE_GEMINI_API_KEY=your_api_key_here`
 4. Run the development server:
 
 ```bash

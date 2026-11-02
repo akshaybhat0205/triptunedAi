@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 const ai = new GoogleGenAI({
   apiKey: process.env.GOOGLE_GEMINI_API_KEY!,
 });
-const MODEL_NAME = "gemini-2.5-flash";
+const MODEL_NAME = "gemini-3.5-flash-lite";
 
 export async function POST(request: NextRequest) {
   const data = await request.formData();
